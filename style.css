@@ -7,16 +7,33 @@
 
 /* Theme */
 :root {
-  color-scheme: dark;
-  --background: #b94b00;
-  --text: #fffaf0;
-  --muted: #fff1db;
-  --rule: #df8a4c;
+  color-scheme: light;
+  --background: #f6f3eb;
+  --text: #202a31;
+  --muted: #4b5960;
+  --rule: #899399;
   font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
   font-size: 18px;
   line-height: 1.45;
   background: var(--background);
   color: var(--text);
+}
+
+/* CSS-only themes; the selected radio resets when the page reloads. */
+:root:has(#theme-orange:checked) {
+  color-scheme: dark;
+  --background: #b94b00;
+  --text: #fffaf0;
+  --muted: #fff1db;
+  --rule: #df8a4c;
+}
+
+:root:has(#theme-projector:checked) {
+  color-scheme: dark;
+  --background: #102a43;
+  --text: #f0f4f8;
+  --muted: #bcccdc;
+  --rule: #486581;
 }
 
 /* Base layout and links */
@@ -26,6 +43,8 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--background);
 }
 
 .page {
@@ -66,18 +85,71 @@ nav {
   font-size: .85rem;
 }
 
-/* Six equal rainbow segments */
-.rainbow {
-  height: 5px;
-  background: linear-gradient(
-    to right,
-    #b84c42 0% 16.666%,
-    #d17c39 16.666% 33.333%,
-    #b0a24c 33.333% 50%,
-    #66845a 50% 66.666%,
-    #587f9a 66.666% 83.333%,
-    #936b98 83.333% 100%
-  );
+.theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.theme-choice {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+
+.theme-swatch {
+  display: block;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  border: 1px solid var(--text);
+  border-radius: 2px;
+}
+
+.theme-swatch-light {
+  background: #f6f3eb;
+}
+
+.theme-swatch-orange {
+  background: #b94b00;
+}
+
+.theme-swatch-projector {
+  background: #102a43;
+}
+
+.theme-choice:checked + .theme-swatch {
+  box-shadow: 0 0 0 1px var(--background), 0 0 0 2px var(--text);
+}
+
+.theme-choice:focus-visible + .theme-swatch {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+
+.top-rule {
+  height: 1px;
+  background: var(--text);
 }
 
 /* Introduction and typography */
@@ -95,7 +167,7 @@ nav {
 }
 
 h1, h2, h3 {
-  color: #fffaf0;
+  color: var(--text);
   line-height: 1.2;
 }
 
@@ -106,7 +178,7 @@ h1 {
 }
 
 h1 span {
-  color: #fff1db;
+  color: var(--muted);
 }
 
 h2 {
@@ -128,8 +200,21 @@ p {
   max-width: 760px;
 }
 
-.intro-note {
-  color: var(--muted);
+.languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.languages li {
+  border: 1px solid var(--text);
+  border-radius: 5px;
+  padding: 7px 13px;
+  font-size: .82rem;
+  font-weight: 700;
 }
 
 .intro > a {
@@ -214,13 +299,82 @@ footer {
   transform: none;
 }
 
-/* Optional screenshot: apply class="project-image" to a project image */
-.project-image {
+/* Project screenshots with an accessible expand control */
+.project-image-wrap {
   float: left;
   width: 40%;
-  height: auto;
+  position: relative;
   border: 8px solid var(--text);
   margin: 0 1.5rem 1rem 0;
+}
+
+.project-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.image-expand, .viewer-close {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--text);
+  color: var(--text);
+  background: var(--background);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.image-expand {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  padding: 56px 24px 24px;
+  border: 0;
+  background: rgb(0 0 0 / 92%);
+}
+
+.image-viewer::backdrop {
+  background: rgb(0 0 0 / 92%);
+}
+
+.image-viewer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.viewer-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-color: white;
+  color: white;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 1.8rem;
+}
+
+.image-expand:focus-visible, .viewer-close:focus-visible {
+  outline: 3px solid var(--muted);
+  outline-offset: 3px;
 }
 
 article::after {
@@ -243,6 +397,7 @@ article::after {
     padding: 24px 0 22px;
     gap: 16px;
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   nav {
@@ -263,7 +418,7 @@ article::after {
     margin-top: 10px;
   }
 
-  .project-image {
+  .project-image-wrap {
     float: none;
     width: 100%;
     margin: 0 0 20px;
